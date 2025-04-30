@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>День полководца RQ</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .form-block {
+      margin-bottom: 15px;
+    }
+    input {
+      padding: 5px;
+      margin-right: 5px;
+      box-sizing: border-box;
+    }
+    input.date-input {
+      width: 70px;
+    }
+    input.time-input {
+      width: 100px;
+    }
+    .output {
+      margin-top: 20px;
+    }
+    .result-line {
+      margin: 4px 0;
+    }
+    .location-label {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Введите время смерти боссов в формате ММ/ДД ЧЧ:ММ:СС</h2>
+  <div id="forms">
+    <!-- Формы добавляются через JS -->
+  </div>
+
+  <button onclick="processDates()">Выполнить</button>
+
+  <div class="output" id="output">
+    <!-- Результаты -->
+  </div>
+
+  <script>
+    const formCount = 5;
+    const locations = ["Эльтан", "Тевтон", "Остров", "Аркон", "Город"];
+
+    function pad(n) {
+      return n < 10 ? '0' + n : n;
+    }
+
+    function getDefaultDate() {
+      const now = new Date();
+      return {
+        date: `${pad(now.getMonth() + 1)}/${pad(now.getDate())}`,
+        time: `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
+      };
+    }
+
+    function createForms() {
+      const container = document.getElementById('forms');
+      for (let i = 0; i < formCount; i++) {
+        const defaults = getDefaultDate();
+        const div = document.createElement('div');
+        div.className = 'form-block';
+        div.innerHTML = `
+          <div class="location-label">${locations[i]}</div>
+          <label>Дата: <input type="text" class="date-input" id="date${i}" value="${defaults.date}"></label>
+          <label>Время: <input type="text" class="time-input" id="time${i}" value="${defaults.time}"></label>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    function processDates() {
+      const output = document.getElementById('output');
+      output.innerHTML = ''; // очистить прошлые результаты
+
+      for (let i = 0; i < formCount; i++) {
+        const dateInput = document.getElementById(`date${i}`);
+        const timeInput = document.getElementById(`time${i}`);
+        const dateVal = dateInput.value.trim();
+        const timeVal = timeInput.value.trim();
+
+        const resultLine = document.createElement('div');
+        resultLine.className = 'result-line';
+
+        const dateMatch = dateVal.match(/^(\d{2})\/(\d{2})$/);
+        const timeMatch = timeVal.match(/^(\d{2}):(\d{2}):(\d{2})$/);
+
+        if (!dateMatch || !timeMatch) {
+          resultLine.textContent = `${locations[i]}: Неверный формат даты или времени!`;
+        } else {
+          const [, MM, DD] = dateMatch;
+          const [, hh, mm, ss] = timeMatch;
+
+          const now = new Date();
+          const year = now.getFullYear();
+          const fullDate = new Date(`${year}-${MM}-${DD}T${hh}:${mm}:${ss}`);
+          fullDate.setMinutes(fullDate.getMinutes() + 95);
+
+          const newTime = `${pad(fullDate.getHours())}:${pad(fullDate.getMinutes())}:${pad(fullDate.getSeconds())}`;
+          resultLine.textContent = `${locations[i]}: ${newTime}`;
+        }
+
+        output.appendChild(resultLine);
+      }
+    }
+
+    createForms();
+  </script>
+</body>
+</html>
